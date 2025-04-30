@@ -32,16 +32,9 @@ async function startSendingMessages(messages) {
     // Launch Puppeteer with the correct executable path
     const browser = await puppeteer.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-zygote',
-        '--single-process',
-      ],
-      executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Update the path if Chrome is installed elsewhere
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
+    
 
     const page = await browser.newPage();
 
