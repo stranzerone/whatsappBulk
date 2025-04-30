@@ -2,42 +2,56 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const XLSX = require('xlsx');
-const fs = require('fs').promises; // Use fs.promises for async file operations
+const fs = require('fs').promises;
+const path = require('path');
 const puppeteerService = require('./puppeteerService');
-const PASSWORD = 1234
+require('dotenv').config();
+
+const PASSWORD = 1234;
 const app = express();
 const port = 5000;
 let isRunning = false;
 
+// Setup file upload
 const upload = multer({ dest: 'uploads/' });
 
+// CORS setup
 app.use(cors({
   origin: 'https://whats-6mlh.onrender.com',
   methods: ['GET', 'POST'],
   credentials: true
 }));
+
 app.use(express.json());
-require('dotenv').config();
-// Check if the Puppeteer job is running
+
+// Serve QR code image and other static files
+app.use('/static', express.static(path.join(__dirname)));
+
+// Route to serve QR code directly
+app.get('/qr', (req, res) => {
+  const qrPath = path.join(__dirname, 'qr-code.png');
+  res.sendFile(qrPath);
+});
+
+// Health check route
 app.get('/api/status', (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
 
-// Upload Excel and initiate WhatsApp messaging
+// Send WhatsApp messages from uploaded Excel
 app.post('/api/send-messages', upload.single('file'), async (req, res) => {
   const filePath = req.file.path;
   const workbook = XLSX.readFile(filePath);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const messages = XLSX.utils.sheet_to_json(sheet);
 
-  // Initialize the status JSON with "pending"
+  // Save initial status
   const initialStatus = messages.map(item => ({
     phone: item.Phone?.toString().replace(/[^\d]/g, ''),
     message: item.Message,
     status: 'pending'
   }));
 
-  // Use asynchronous file writing to avoid blocking the event loop
   try {
     await fs.writeFile('messageStatus.json', JSON.stringify(initialStatus, null, 2));
   } catch (err) {
@@ -60,6 +74,7 @@ app.post('/api/send-messages', upload.single('file'), async (req, res) => {
   res.json({ status: 'started' });
 });
 
+// Login endpoint
 app.post('/api/login', (req, res) => {
   const { password } = req.body;
   if (password == PASSWORD) {
@@ -69,15 +84,11 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// API to reset all logs and clear message status
+// Reset logs
 app.post('/api/reset', async (req, res) => {
   try {
-    // Clear the message status file
-    await fs.writeFile('messageStatus.json', JSON.stringify([], null, 2)); // Empty array
-
-    // Reset the isRunning flag and other server-side data if necessary
+    await fs.writeFile('messageStatus.json', JSON.stringify([], null, 2));
     isRunning = false;
-
     res.status(200).json({ message: 'Logs reset successfully' });
   } catch (err) {
     console.error('❌ Error resetting logs:', err.message);
@@ -85,11 +96,10 @@ app.post('/api/reset', async (req, res) => {
   }
 });
 
-
-// API to get real-time status
+// Fetch message status
 app.get('/api/message-status', async (req, res) => {
   try {
-    const data = JSON.parse(await fs.readFile('messageStatus.json', 'utf8')); // Use async read
+    const data = JSON.parse(await fs.readFile('messageStatus.json', 'utf8'));
     res.json(data);
   } catch (err) {
     console.error('❌ Error reading status file:', err.message);
@@ -97,6 +107,7 @@ app.get('/api/message-status', async (req, res) => {
   }
 });
 
+// Start server
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
 });

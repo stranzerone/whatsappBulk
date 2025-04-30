@@ -30,7 +30,7 @@ async function startSendingMessages(messages) {
   let browser;
   try {
     // Launch Puppeteer with the correct executable path
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
@@ -45,9 +45,19 @@ async function startSendingMessages(messages) {
     });
 
     // Navigate to WhatsApp Web
+    await page.goto('https://web.whatsapp.com');
     console.log('🟡 Opening WhatsApp Web...');
-    await page.goto('https://web.whatsapp.com', { waitUntil: 'networkidle2' });
-
+    
+    // Wait for the QR code canvas to appear
+    try {
+      await page.waitForSelector('canvas', { timeout: 60000 });
+      const qrPath = path.join(__dirname, 'qr-code.png');
+      await page.screenshot({ path: qrPath });
+      console.log('🟢 QR code screenshot saved at:', qrPath);
+    } catch (err) {
+      console.log('❌ QR code not found:', err.message);
+    }
+    
     // Wait for the QR code to disappear, indicating successful login
     console.log('🟡 Waiting for QR code scan...');
     await page.waitForSelector('div[role="grid"]', { timeout: 0 });
