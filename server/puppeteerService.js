@@ -1,10 +1,7 @@
 const puppeteer = require('puppeteer');
 
 // Set executable path to environment or default to Puppeteer's cache directory
-const executablePath = process.env.PUPPETEER_EXEC_PATH || '/opt/render/.cache/puppeteer/chrome/linux-135.0.7049.114/chrome-linux64/chrome';
-
 async function startSendingMessages(messages) {
-  // Launch browser with the proper executablePath
   const browser = await puppeteer.launch({
     headless: true,
     args: [
@@ -15,9 +12,8 @@ async function startSendingMessages(messages) {
       '--no-zygote',
       '--single-process'
     ],
-    executablePath: executablePath, // Set executable path dynamically
+    executablePath: process.env.PUPPETEER_EXEC_PATH || '/opt/render/.cache/puppeteer/chrome/linux-135.0.7049.114/chrome-linux64/chrome'
   });
-
   const page = await browser.newPage();
 
   // Automatically accept dialogs (useful for confirmation prompts)
