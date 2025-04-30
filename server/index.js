@@ -11,7 +11,11 @@ let isRunning = false;
 
 const upload = multer({ dest: 'uploads/' });
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://whats-6mlh.onrender.com',
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Check if the Puppeteer job is running
