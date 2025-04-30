@@ -17,7 +17,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-
+require('dotenv').config();
 // Check if the Puppeteer job is running
 app.get('/api/status', (req, res) => {
   res.status(200).json({ message: "Server is running" });
