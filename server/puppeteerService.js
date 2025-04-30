@@ -19,18 +19,14 @@ function updateStatus(phone, newStatus) {
 async function startSendingMessages(messages) {
   // Launch browser with headless mode (use `false` for debugging, `true` for production)
   const browser = await puppeteer.launch({
-    headless: true, // Set to `false` if you want to see the browser for debugging
+    headless: false, // Set to false so the Chrome window opens and QR can be scanned
+    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     args: [
-      '--no-sandbox', // Bypass sandbox restrictions
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage', // Avoid shared memory issues in containerized environments
-      '--disable-gpu', // Disable GPU hardware acceleration
-      '--no-zygote', // Workaround for issues in Docker or VM environments
-      '--single-process', // Force single process to avoid issues in multi-process systems
-      '--remote-debugging-port=9222', // Useful for debugging, especially in headless mode
+      '--no-sandbox',
+      '--disable-setuid-sandbox'
     ]
   });
-
+  
   const page = await browser.newPage();
 
   // Automatically accept dialogs (useful for confirmation prompts)
