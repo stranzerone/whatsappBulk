@@ -1,8 +1,7 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer'); // Use full puppeteer
 const fs = require('fs');
 const path = require('path');
 
-const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const statusFile = path.join(__dirname, 'messageStatus.json');
 
 function updateStatus(phone, newStatus) {
@@ -16,14 +15,19 @@ function updateStatus(phone, newStatus) {
 
 async function startSendingMessages(messages) {
   const browser = await puppeteer.launch({
-    headless: false,
-    executablePath: chromePath,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    headless: true, // use false only for local testing
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-zygote',
+      '--single-process'
+    ]
   });
 
   const page = await browser.newPage();
 
-  // Automatically accept dialogs
   page.on('dialog', async dialog => {
     console.log('Alert:', dialog.message());
     await dialog.accept();
