@@ -35,7 +35,6 @@ async function startSendingMessages(messages) {
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     
-
     const page = await browser.newPage();
 
     // Automatically handle alerts/dialogs
@@ -56,6 +55,7 @@ async function startSendingMessages(messages) {
       console.log('🟢 QR code screenshot saved at:', qrPath);
     } catch (err) {
       console.log('❌ QR code not found:', err.message);
+      return;
     }
     
     // Wait for the QR code to disappear, indicating successful login
@@ -102,8 +102,9 @@ async function startSendingMessages(messages) {
         updateStatus(phone, 'failed');
       }
 
-      // Add a delay to prevent rate limiting
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 3-second delay
+      // Add a delay with some randomness to prevent rate limiting
+      const delay = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000; // Random delay between 2-5 seconds
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   } catch (error) {
     console.error('Critical error during Puppeteer operation:', error.message);
