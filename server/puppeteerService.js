@@ -19,13 +19,11 @@ function updateStatus(phone, newStatus) {
 async function startSendingMessages(messages) {
   // Launch browser with headless mode (use `false` for debugging, `true` for production)
   const browser = await puppeteer.launch({
-    headless: false, // Set to false so the Chrome window opens and QR can be scanned
-    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox'
-    ]
+    headless: true,
+    channel: 'chrome', // uses installed chrome
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
+  
   
   const page = await browser.newPage();
 
