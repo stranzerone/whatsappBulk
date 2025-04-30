@@ -27,7 +27,8 @@ async function startSendingMessages(messages) {
       '--disable-gpu',
       '--no-zygote',
       '--single-process'
-    ]
+    ],
+    executablePath: puppeteer.executablePath()  // ✅ Ensures bundled Chrome is used
   });
   
   
