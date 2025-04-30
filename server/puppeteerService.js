@@ -1,7 +1,25 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 
-// Set executable path to environment or default to Puppeteer's cache directory
+// Path to message status file (Make sure this is properly defined)
+const statusFile = path.join(__dirname, 'messageStatus.json');
+
+// Function to update the status of the message for the given phone number
+function updateStatus(phone, newStatus) {
+  const data = JSON.parse(fs.readFileSync(statusFile, 'utf8'));
+  const index = data.findIndex(entry => entry.phone === phone);
+  if (index !== -1) {
+    data[index].status = newStatus;
+    fs.writeFileSync(statusFile, JSON.stringify(data, null, 2));
+  }
+}
+
+// Function to send messages using Puppeteer
 async function startSendingMessages(messages) {
+  // Set executable path using environment variable or fallback to default
+  const executablePath = process.env.PUPPETEER_EXEC_PATH || '/opt/render/.cache/puppeteer/chrome/linux-135.0.7049.114/chrome-linux64/chrome';
+
   const browser = await puppeteer.launch({
     headless: true,
     args: [
@@ -10,10 +28,11 @@ async function startSendingMessages(messages) {
       '--disable-dev-shm-usage',
       '--disable-gpu',
       '--no-zygote',
-      '--single-process'
+      '--single-process',
     ],
-    executablePath: process.env.PUPPETEER_EXEC_PATH || '/opt/render/.cache/puppeteer/chrome/linux-135.0.7049.114/chrome-linux64/chrome'
+    executablePath,  // Use the determined executablePath
   });
+
   const page = await browser.newPage();
 
   // Automatically accept dialogs (useful for confirmation prompts)
